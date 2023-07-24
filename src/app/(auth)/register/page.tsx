@@ -1,12 +1,16 @@
 'use client';
 
-import { login, registerUser } from '@/api/v1/auth/login';
+import { registerUser } from '@/api/v1/auth/login';
+import { ApiErrorResponse } from '@/types/apiTypes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
+import { ApiError } from 'next/dist/server/api-utils';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import * as yup from 'yup';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 
 const schema = yup.object().shape({
   name: yup.string().required('Name is required'),
@@ -15,6 +19,9 @@ const schema = yup.object().shape({
 });
 
 const Page = () => {
+  const [RegisterError, setRegisterError] = useState<ApiError>();
+  const [loading, setLoading] = useState(false);
+  const navigate = useRouter();
   const {
     register,
     handleSubmit,
@@ -28,8 +35,22 @@ const Page = () => {
     resolver: yupResolver(schema),
   });
 
-  const handleRegister = (data: FieldValues) => {
-    const res = registerUser(data);
+  const handleRegister = async (data: FieldValues) => {
+    setLoading(true);
+    try {
+      const res = await registerUser(data);
+
+      const expiresIn = 60 * 60 * 24 * 5 * 1000;
+
+      Cookies.set('accessToken', res.data.data.accesstoken, {
+        expires: expiresIn,
+      });
+      navigate.push('/recipe');
+      setLoading(false);
+    } catch (error: unknown) {
+      setRegisterError((error as ApiErrorResponse<any>).response?.data);
+      setLoading(false);
+    }
   };
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
@@ -76,6 +97,7 @@ const Page = () => {
                       'block w-full  appearance-none rounded-md  bg-secondary-gray  px-3 py-3 placeholder-gray-400 shadow-sm sm:text-sm'
                     )}
                     id="title"
+                    type="email"
                     placeholder="admin@gmail.com"
                   />
                   {errors.email && (
@@ -99,18 +121,23 @@ const Page = () => {
                       id="password"
                       placeholder="12345678"
                     />
-                    {errors.email && (
+                    {errors.password && (
                       <p className="text-sm mt-3 px-2 text-red-400">
-                        {errors.email.message}
+                        {errors.password.message}
                       </p>
                     )}
                   </div>
+                  {RegisterError && (
+                    <p className="text-sm text-center mt-3 px-2 text-red-400">
+                      {RegisterError.message}
+                    </p>
+                  )}
                   <div className="relative pt-3 text-center w-full">
                     <button
                       type="submit"
                       className="bg-blue-500 w-full text-sm  text-white rounded-md px-4 py-1"
                     >
-                      Register with Email
+                      {loading ? 'loading...' : 'Register with Email'}
                     </button>
 
                     <Link href="/login">

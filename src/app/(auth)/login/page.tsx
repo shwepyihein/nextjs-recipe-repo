@@ -5,17 +5,22 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import * as yup from 'yup';
+import cookies from 'js-cookie';
+import { ApiErrorResponse } from '@/types/apiTypes';
+import { ApiError } from 'next/dist/server/api-utils';
 
 const schema = yup.object().shape({
-  email: yup.string().required('Title is required'),
-  password: yup.string().required('Category is required'),
+  email: yup.string().required('Email is required'),
+  password: yup.string().required('password is required'),
 });
 
 const Page = () => {
   const navigate = useRouter();
+  const [loginError, setLoginError] = useState<ApiError>();
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -29,8 +34,21 @@ const Page = () => {
   });
 
   const handleLogin = async (data: FieldValues) => {
-    await login(data);
-    navigate.push('/recipe');
+    setLoading(true);
+    try {
+      const res = await login(data);
+
+      const expiresIn = 60 * 60 * 24 * 5 * 1000;
+
+      cookies.set('accessToken', res.data.data.accesstoken, {
+        expires: expiresIn,
+      });
+      navigate.push('/recipe');
+      setLoading(false);
+    } catch (error: unknown) {
+      setLoginError((error as ApiErrorResponse<any>).response?.data);
+      setLoading(false);
+    }
   };
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
@@ -45,7 +63,7 @@ const Page = () => {
               <div className="divide-y divide-gray-200">
                 <div className="pt-2 text-base leading-6 space-y-2 text-gray-700 sm:text-lg sm:leading-7">
                   <label
-                    htmlFor="Email"
+                    htmlFor="email"
                     className="block text-sm font-medium leading-6 text-gray-600"
                   >
                     Email <span className="text-red-400">*</span>
@@ -56,7 +74,8 @@ const Page = () => {
                     className={classNames(
                       'block w-full  appearance-none rounded-md  bg-secondary-gray  px-3 py-3 placeholder-gray-400 shadow-sm sm:text-sm'
                     )}
-                    id="title"
+                    id="email"
+                    type="email"
                     placeholder="admin@gmail.com"
                   />
                   {errors.email && (
@@ -80,18 +99,23 @@ const Page = () => {
                       id="password"
                       placeholder="12345678"
                     />
-                    {errors.email && (
+                    {errors.password && (
                       <p className="text-sm mt-3 px-2 text-red-400">
-                        {errors.email.message}
+                        {errors.password.message}
                       </p>
                     )}
                   </div>
+                  {loginError && (
+                    <p className="text-sm text-center mt-3 px-2 text-red-400">
+                      {loginError.message}
+                    </p>
+                  )}
                   <div className="relative pt-3  text-center w-full">
                     <button
                       type="submit"
                       className="bg-blue-500 w-full cursor-pointer text-sm  text-white rounded-md px-4 py-1"
                     >
-                      Login with Email
+                      {loading ? <p>loading ...</p> : 'Login with Email'}
                     </button>
 
                     <Link href="/register">

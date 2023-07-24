@@ -2,7 +2,7 @@
 
 <br/>
 <p align="center">
-<img src="images/website.png" alt="Receipe App">
+<img src="public/website.png" alt="Receipe App">
 </p>
 
 ## Table of Contents

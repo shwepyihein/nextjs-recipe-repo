@@ -5,8 +5,6 @@ export async function middleware(request: NextRequest, response: NextResponse) {
   const session = request.cookies.get('accessToken');
   const path = request.nextUrl.pathname;
 
-  console.log(path, session);
-
   //Return to /login if don't have a session
   if (!session && path !== '/login' && path !== '/register') {
     return NextResponse.redirect(new URL('/login', request.url));

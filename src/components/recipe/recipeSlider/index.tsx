@@ -7,12 +7,15 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { mutate } from 'swr';
 import { createRecipe, updateRecipe } from '@/api/v1/recipe/recipe';
 import SlideOver from '@/ui/SideOver';
+import { ApiError } from 'next/dist/server/api-utils';
+import { ApiErrorResponse } from '@/types/apiTypes';
 
 type ReciperSliderProps = {
   open: boolean;
   setOpen: (v: boolean) => void;
   type: 'create' | 'update';
   updateData?: RecipeType;
+  fetchRecipe: () => void;
 };
 
 const schema = yup.object().shape({
@@ -32,6 +35,7 @@ export default function ReciperSlider({
   type,
   open,
   setOpen,
+  fetchRecipe,
 }: ReciperSliderProps) {
   const {
     register,
@@ -40,7 +44,7 @@ export default function ReciperSlider({
     getValues,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm({
     defaultValues: {
       id: '',
@@ -54,6 +58,8 @@ export default function ReciperSlider({
   });
 
   const [existError, setExistError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<ApiError>();
 
   useEffect(() => {
     if (type === 'update') {
@@ -61,7 +67,10 @@ export default function ReciperSlider({
     }
   }, [type, updateData]);
 
+  console.log(isDirty);
+
   const onSubmit = async (data: FieldValues) => {
+    setLoading(true);
     const newData: RecipeType = {
       title: data.title,
       category: data.category,
@@ -71,7 +80,6 @@ export default function ReciperSlider({
     if (type === 'create') {
       try {
         await createRecipe(newData);
-        mutate('/recipes');
         setOpen(false);
         reset({
           title: '',
@@ -80,10 +88,15 @@ export default function ReciperSlider({
           ingredients: [],
           ingredient: '',
         });
-      } catch (error) {}
+        fetchRecipe();
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        setSubmitError((error as ApiErrorResponse<any>).response?.data);
+      }
     } else {
-      await updateRecipe(updateData?.id, newData).then((res) => {
-        mutate('/recipes');
+      try {
+        await updateRecipe(updateData?.mongo_id, newData);
         setOpen(false);
         reset({
           title: '',
@@ -92,7 +105,12 @@ export default function ReciperSlider({
           ingredients: [],
           ingredient: '',
         });
-      });
+        fetchRecipe();
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        setSubmitError((error as ApiErrorResponse<any>).response?.data);
+      }
     }
   };
 
@@ -264,6 +282,11 @@ export default function ReciperSlider({
               )}
             </div>
           </div>
+          {submitError && (
+            <p className="text-sm text-center mt-3 px-2 text-red-400">
+              {submitError.message}
+            </p>
+          )}
           <div className="flex gap-3 px-5 justify-end">
             <button
               onClick={() => {
@@ -276,9 +299,10 @@ export default function ReciperSlider({
             </button>
             <button
               type="submit"
-              className="capitalize px-5 py-2 text-sm mt-5  bg-black text-white transition-colors duration-200 border rounded-lg sm:w-auto"
+              disabled={!isDirty || loading}
+              className="capitalize disabled:bg-gray-400 px-5 py-2 text-sm mt-5  bg-black text-white transition-colors duration-200 border rounded-lg sm:w-auto"
             >
-              {type}
+              {loading ? 'loading ...' : type}
             </button>
           </div>
         </form>

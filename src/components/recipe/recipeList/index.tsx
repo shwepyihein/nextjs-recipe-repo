@@ -5,6 +5,7 @@ import React from 'react';
 type RecipeListProps = {
   searchInput: string;
   data: RecipeType[];
+  loading: boolean;
   callBackDelete: (recipe: RecipeType) => void;
   callBackDetail: (recipe: RecipeType) => void;
   callBackUpdate: (recipe: RecipeType) => void;
@@ -12,6 +13,7 @@ type RecipeListProps = {
 
 const RecipeList = ({
   data,
+  loading,
   searchInput,
   callBackDetail,
   callBackDelete,
@@ -27,6 +29,21 @@ const RecipeList = ({
     );
   });
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[500px]">
+        loading ...
+      </div>
+    );
+  }
+
+  if (!loading && filteredRecipes.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[500px]">
+        <p> there is no data...</p>
+      </div>
+    );
+  }
   return (
     <div>
       <div className="mt-5 py-5 px-5 grid md:grid-cols-2 grid-cols-1 lg:grid-cols-3 gap-5">

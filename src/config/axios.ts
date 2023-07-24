@@ -14,7 +14,7 @@ const authInterceptor = async (config: InternalAxiosRequestConfig<any>) => {
 
   return config;
 };
-console.log(env);
+
 // Users api endpoint
 export const baseAPI = axios.create({
   baseURL: env.API_URL,

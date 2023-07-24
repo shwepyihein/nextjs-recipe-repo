@@ -32,10 +32,16 @@ export default function Page() {
   // recipe
 
   const [data, setData] = useState([]);
+  const [fetchLoading, setFetchLoading] = useState(true);
 
   const fetchRecipe = async () => {
-    const { data } = await fetchallRecipes(1);
-    setData(data);
+    try {
+      const { data } = await fetchallRecipes(1);
+      setData(data);
+      setFetchLoading(false);
+    } catch (error) {
+      setFetchLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -58,16 +64,25 @@ export default function Page() {
   };
 
   const handleDelete = async () => {
-    await deleteRecipe(deleteData?.id).then((res) => {
-      mutate('/recipes');
+    try {
+      await deleteRecipe(deleteData?.mongo_id);
       setDeleteDialog(false);
-    });
+      fetchRecipe();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <>
-      <ReciperSlider type="create" open={open} setOpen={setOpen} />
       <ReciperSlider
+        fetchRecipe={fetchRecipe}
+        type="create"
+        open={open}
+        setOpen={setOpen}
+      />
+      <ReciperSlider
+        fetchRecipe={fetchRecipe}
         updateData={updateData}
         type="update"
         open={updateSlide}
@@ -171,6 +186,7 @@ export default function Page() {
         </div>
 
         <RecipeList
+          loading={fetchLoading}
           data={data}
           searchInput={searchInput}
           callBackDetail={callBackDetail}

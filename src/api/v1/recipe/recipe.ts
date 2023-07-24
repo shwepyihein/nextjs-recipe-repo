@@ -16,6 +16,6 @@ export const updateRecipe = async (
 };
 
 export const fetchallRecipes = async (page: string | number) => {
-  const { data } = await baseAPI.get(`/recipes?limit=20&page${page}`);
+  const { data } = await baseAPI.get(`/recipes?limit=30&page${page}`);
   return data.data;
 };

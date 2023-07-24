@@ -31,7 +31,7 @@ export default function DialogModel({
         </Transition.Child>
 
         <div className="fixed top-0 left-0 inset-0 z-[80] overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-end justify-center p-5 text-center sm:items-center sm:p-0">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -44,7 +44,7 @@ export default function DialogModel({
               <Dialog.Panel
                 className={classNames(
                   className,
-                  'relative h-screen lg:h-auto transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6'
+                  'relative h-screen  lg:h-auto transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6'
                 )}
               >
                 {children}
