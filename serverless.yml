@@ -1,12 +1,7 @@
-org: shwepyihein
-app: nextjs-recipe-serverless-cicd
-service: nextjs-recipe-serverless-cicd
+name: nextjs-serverless-recipe-cicd
 
-provider:
-  name: aws
-  runtime: nodejs16.x
-  stage: dev
-  region: us-east-1
-
-nextjs-recipe-serverless-cicd:
-  component: '@sls-next/serverless-component@3.5.3-alpha.4'
+prod-your-site-name:
+  component: '@sls-next/serverless-component@latest'
+inputs:
+  bucketName: nextjs-serverless-recipe-cicd
+  description: 'Lambda@Edge for nextjs-serverless-recipe-cicd'
