@@ -18,7 +18,6 @@ jobs:
       - uses: canastro/copy-file-action@master
         with:
           source: 'serverless.yml'
-          target: 'serverless.yml'
 
       - uses: actions/setup-node@v2
         with:
