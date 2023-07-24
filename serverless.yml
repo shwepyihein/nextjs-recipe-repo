@@ -1,7 +1,0 @@
-name: nextjs-serverless-recipe-cicd
-
-prod-your-site-name:
-  component: '@sls-next/serverless-component@latest'
-inputs:
-  bucketName: nextjs-serverless-recipe-cicd
-  description: 'Lambda@Edge for nextjs-serverless-recipe-cicd'
